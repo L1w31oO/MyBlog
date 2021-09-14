@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 1、头部 -->
+<head th:replace="fragment/frontend_fragment::head(主页)"></head>
+
+<!-- 2、中间内容body(导航nav, 底部footer) -->
+<body>
+<!-- 容器局部刷新 -->
+<div id="pageContainer">
+    <!--    <div class="bg-index">-->
+    <!-- 2.1：导航栏 -->
+    <!--
+        id="nav"：waypoint的标签
+        class="m-nav"：自设的导航栏样式
+        style="display: none"：不显示
+    -->
+    <nav id="nav" class="m-nav" style="display: none">
+        <!-- semantic ui container 拥有响应式的效果-->
+        <div class="ui container">
+            <!--
+                inverted：与背景反色
+                secondary：二级
+                stackable：手机端可堆叠式
+            -->
+            <div class="ui inverted secondary stackable menu">
+
+                <h2 class="ui teal header item">L1w31's Blog</h2>
+                <a href="#" th:href="@{/}" class="active m-item item"><i class="home icon"></i>首页</a>
+                <a href="#" th:href="@{/frontend/types/-1}" class="m-item item"><i class="clone outline icon"></i>分类</a>
+                <a href="#" th:href="@{/frontend/archives}" class="m-item item"><i class="clock icon"></i>归档</a>
+                <a href="#" th:href="@{/frontend/about}" class="m-item item"><i class="info icon"></i>关于我</a>
+                <a href="#" th:href="@{/frontend/login}" class="m-item item" target="_blank"><i
+                        class="user circle icon"></i>登录</a>
+                <div class="right m-item item">
+                    <form name="search" action="#" th:action="@{/frontend/search}" method="post" target="_blank">
+                        <!--
+                            transparent：与背景同色
+                            m-margin-tb-tiny：自设的上下外边距样式
+                        -->
+                        <div class="ui transparent input icon m-margin-tb-tiny" style="color: white">
+                            <input type="text" name="query" placeholder="Search...."
+                                   th:value="${query}">
+                            <i onclick="document.forms['search'].submit()" class="search link icon"></i>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- m-mobile-hide：手机端隐藏 -->
+        <a href="#" class="ui menu toggle black icon button m-mobile-hide" style="display: none">
+            <i class="sidebar icon"></i>
+        </a>
+    </nav>
+
+    <!-- 2.2：中间内容---顶部图片 -->
+    <div class="m-index-cover animated fadeIn">
+        <img src="../static/images/bg.jpg" th:src="@{/images/cover.jpg}" alt=""
+             class="ui m-index-cover-image image">
+        <div class="m-index-cover-text" align="center">
+            <div class="m-index-cover-text-name m-margin-tb-small" align="center">L1w31's Blog</div>
+            <div class="m-index-cover-text-sign m-margin-tb-small" align="center">人生得意须尽欢 ，莫使金樽空对月</div>
+            <div class="m-index-cover-text-start m-margin-top" align="center">GET START</div>
+            <div id="toShow-button" class="ui teal icon button m-margin-top" align="center">
+                <i class="chevron down icon"></i>
+            </div>
+        </div>
+    </div>
+    <div id="waypoint" class="m-index-waypoint-location"></div>
+
+    <!-- 2.3：中间内容---博客内容 -->
+    <div class="m-opacity m-padded-tb-huge">
+        <!--拥有：响应式的效果-->
+        <div class="ui container">
+            <!--推荐：篇目数-->
+            <div class="ui segment center aligned radius-all m-margin-bottom m-index-title-bar-background">
+                <span class="m-font-Chinese">最新推荐：</span>
+                <span class="m-font-number" th:text="${#arrays.length(blogs)}">16</span>
+                <span class="m-font-Chinese">篇</span>
+            </div>
+            <!--博客：中间content-->
+            <div class="ui segment radius-all" th:each="blog : ${blogs}">
+                <div class="ui padded-lr vertical m-padded-tb-small m-mobile-clear segment">
+                    <div class="ui middle aligned mobile reversed stackable grid">
+                        <div class="eleven wide column m-padded-tb-small">
+                            <div class="title-header m-margin-bottom-middle">
+                                <a class="m-black" th:href="@{/frontend/blog/{id}(id=${blog.id})}"
+                                   th:text="${blog.title}" target="_blank">
+                                </a>
+                            </div>
+                            <p class="m-text m-margin-top-larger-px" th:text="|${blog.description}...|">
+                                随着岁月的境迁, 同学们的差距会越来越来大？这是什么原因呢？ 很大程度上，读书阶段就已经造就了这种局面。
+                                我想这便是自我约束力的丧失。导致生活任意妄为， 浑浑噩噩，每天混迹于
+                            </p>
+                            <div class="ui m-margin-top-larger-px grid">
+                                <div class="thirteen wide column">
+                                    <div class="ui mini horizontal link list">
+                                        <div class="item">
+                                            <img src="/images/avatar.jpg" th:src="@{${blog.user.avatar}}" alt=""
+                                                 class="ui avatar image">
+                                            <div class="content"><a th:href="@{/frontend/about}" class="header"
+                                                                    th:text="${blog.user.nickname}">haha</a></div>
+                                        </div>
+                                        <div class="item">
+                                            <i class="calendar icon"></i><span
+                                                th:text="${#dates.format(blog.updateTime, 'yyyy-MM-dd HH:mm')}">2021-03-02</span>
+                                        </div>
+                                        <div class="item">
+                                            <i class="eye icon"></i> <span th:text="${blog.views}">477</span>
+                                        </div>
+                                        <div class="item">
+                                            <i class="comment outline icon"></i><span
+                                                th:text="${blog.commentNum}">5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="right aligned three wide column">
+                                    <a target="_blank"
+                                       class="ui teal basic label m-padded-tiny m-text-thin font-spacing"
+                                       th:text="${blog.type.name}">框架底层原理</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="five wide column">
+                            <a href="#" th:href="@{/frontend/blog/{id}(id=${blog.id})}">
+                                <img th:src="@{${blog.firstPicture}}" alt="" class="ui rounded image">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--</div>-->
+<!-- 2.4：中间内容---置顶图标 -->
+<!--<div id="toolbar" class="m-padded-tb-large m-fixed m-right-bottom" style="display: none">-->
+<!--    <div id="toTop-button" class="ui teal icon button"><i class="chevron up icon"></i></div>-->
+<!--</div>-->
+
+<!-- 2.5：底部footer -->
+<footer th:replace="fragment/frontend_fragment::footer"></footer>
+
+<!-- 3、js引用 -->
+<!--/*/<th:block th:replace="fragment/frontend_fragment :: script">/*/-->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" th:src="@{/js/admin/jquery.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js" th:src="@{/js/semantic.js}"></script>
+<!--/*/</th:block>/*/-->
+
+<!-- 4、页面专用js -->
+<script>
+
+    // 移动端 导航栏点击显示
+    $('.menu.toggle').click(function () {
+        $('.m-item').toggleClass('m-mobile-show');
+    });
+
+    // 显示微信
+    $('.wechat').popup({
+        popup: $('.wechat-qr'),
+        position: 'bottom center'
+    });
+
+    // 显示QQ
+    $('.qq').popup({
+        popup: $('.qq-qr'),
+        position: 'bottom center'
+    });
+
+    // 显示邮箱
+    $('.email').popup();
+
+    // 显示CSDN
+    $('.csdn').popup();
+
+    // 显示github
+    $('.github').popup();
+
+    // 显示gitee
+    $('.gitee').popup();
+
+    // 向下
+    $('#toShow-button').click(function () {
+        $(window).scrollTo(1010, 900);
+    });
+
+    // 导航栏显示
+    var waypoint = new Waypoint({
+        element: document.getElementById('waypoint'),
+        handler: function (direction) {
+            if (direction == 'down') {
+                $('#nav').show(0);
+            } else {
+                $('#nav').hide(500);
+            }
+            console.log('Scrolled to waypoint!' + direction);
+        }
+    });
+
+    // 置顶按钮显示
+    // var waypoint = new Waypoint({
+    //     element: document.getElementById('waypoint'),
+    //     handler: function (direction) {
+    //         if (direction == 'down') {
+    //             $('#toolbar').show(100);
+    //         } else {
+    //             $('#toolbar').hide(500);
+    //         }
+    //         console.log('Scrolled to waypoint!  ' + direction);
+    //     }
+    // });
+
+    // 置顶
+    // $('#toTop-button').click(function () {
+    //     $(window).scrollTo(0, 600);
+    // });
+
+</script>
+
+<!-- PJAX -->
+<div class="loading"></div>
+<script>
+
+    //
+    $(document).pjax('a[target!=_blank]', '#pageContainer', {fragment: '#pageContainer', timeout: 8000});
+
+    // 评论和搜索等form事件无刷新
+    $(document).on("submit", "form", "btnPost",
+        function (a) {
+            $.pjax.submit(a, "#pageContainer", {
+                fragment: "#pageContainer",
+                timeout: 8000
+            });
+        });
+
+    // pjax链接点击后显示加载动画；
+    $(document).on('pjax:send', function () {
+        // 将#loading的内容显示 加载动画
+        $(".loading").css("display", "block");
+        // 预加载函数可以写在这里
+
+    });
+
+    // pjax加载结束的回调函数 解决js无法定位的问题
+    $(document).on('pjax:complete', function () {
+
+        // 将#loading的内容隐藏 加载动画
+        $(".loading").css("display", "none");
+
+        //页面刷新后有些函数没有调用在这里可以写上你的函数让他重新加载
+        $.getScript("https://cdn.jsdelivr.net/npm/waypoints@4.0.1/lib/jquery.waypoints.min.js");
+        $.getScript("https://cdn.jsdelivr.net/npm/jquery.scrollto@2.1.2/jquery.scrollTo.min.js");
+
+        // 移动端 导航栏点击显示
+        $('.menu.toggle').click(function () {
+            $('.m-item').toggleClass('m-mobile-show');
+        });
+
+        // 显示微信
+        $('.wechat').popup({
+            popup: $('.wechat-qr'),
+            position: 'top center'
+        });
+
+        // 显示QQ
+        $('.qq').popup({
+            popup: $('.qq-qr'),
+            position: 'bottom center'
+        });
+
+        // 显示邮箱
+        $('.email').popup();
+
+        // 显示CSDN
+        $('.csdn').popup();
+
+        // 显示github
+        $('.github').popup();
+
+        // 显示gitee
+        $('.gitee').popup();
+
+        // 向下
+        $('#toShow-button').click(function () {
+            $(window).scrollTo(1010, 900);
+        });
+
+        // 导航栏显示
+        var waypoint = new Waypoint({
+            element: document.getElementById('waypoint'),
+            handler: function (direction) {
+                if (direction == 'down') {
+                    $('#nav').show(0);
+                } else {
+                    $('#nav').hide(500);
+                }
+                console.log('Scrolled to waypoint!  ' + direction);
+            }
+        });
+
+        // 置顶按钮显示
+        // var waypoint = new Waypoint({
+        //     element: document.getElementById('waypoint'),
+        //     handler: function (direction) {
+        //         if (direction == 'down') {
+        //             $('#toolbar').show(100);
+        //         } else {
+        //             $('#toolbar').hide(500);
+        //         }
+        //         console.log('Scrolled to waypoint!  ' + direction);
+        //     }
+        // });
+
+        // 置顶
+        // $('#toTop-button').click(function () {
+        //     $(window).scrollTo(0, 600);
+        // });
+    });
+</script>
+<!-- 动态轮播背景图片 -->
+<!--<script type="text/javascript">-->
+<!--    var curIndex = 0;-->
+<!--    //时间间隔(单位毫秒)，每秒钟显示一张，数组共有3张图片放在img文件夹下-->
+<!--    var timeInterval = 10000;-->
+<!--    //定义一个存放照片位置的数组，可以放任意个，在这里放3个-->
+<!--    var arr = new Array();-->
+<!--    arr[0] = "../images/background_login.jpg";-->
+<!--    arr[1] = "../images/background_index.png";-->
+<!--    arr[2] = "../images/background_type.jpg";-->
+<!--    setInterval(changeImg, timeInterval);-->
+<!--    document.body.style.backgroundImage = "URL(" + arr[1] + ")";-->
+<!--    function changeImg() {-->
+<!--        if (curIndex == arr.length - 1) {-->
+<!--            curIndex = 0;-->
+<!--        } else {-->
+<!--            curIndex += 1;-->
+<!--        }-->
+<!--        //设置body的背景图片-->
+<!--        document.body.style.backgroundImage = "URL(" + arr[curIndex] + ")";  //显示对应的图片-->
+<!--    }-->
+<!--</script>-->
+</body>
+</html>

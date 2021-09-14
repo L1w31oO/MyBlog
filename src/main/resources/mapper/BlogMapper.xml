@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.dao.BlogMapper">
+
+    <!--（1、2、3、5）语句查询：公用type和user封装（语句）-->
+    <resultMap id="ResultOne" type="blog" autoMapping="true">
+
+        <id property="id" column="bId"/>
+
+        <!--给type对象：注入值-->
+        <association property="type" javaType="type">
+            <id property="id" column="tId"/>
+            <result property="name" column="tName"/>
+        </association>
+
+        <!--给User对象：注入值-->
+        <association property="user" javaType="user">
+            <id property="id" column="uId"/>
+            <result property="nickname" column="uNickname"/>
+            <result property="avatar" column="uAvatar"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="ResultTwo" type="blog" autoMapping="true">
+        <id column="id" property="id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="firstPicture" column="first_picture"/>
+        <result property="shareStatement" column="share_statement"/>
+
+
+        <!--给type对象：注入值-->
+        <association property="type" javaType="type">
+            <id property="id" column="type_id"/>
+        </association>
+
+        <!--给user对象：注入值-->
+        <association property="user" javaType="user">
+            <id property="id" column="user_id"/>
+        </association>
+    </resultMap>
+
+    <!-- 1、查询：（最新、推荐）的num篇文章 -->
+    <select id="selectBlogListByLatestRecommendNum" parameterType="int" resultMap="ResultOne">
+        select
+               b.id 'bId',
+               title,
+               description,
+               first_picture 'firstPicture',
+               u.id  'uId',
+               u.nickname 'uNickname',
+               u.avatar 'uAvatar' ,
+               b.create_time 'createTime',
+               b.update_time 'updateTime',
+               views,
+               t.id 'tId',
+               t.name 'tName',
+               recommend
+        from myblog.t_blog b, myblog.t_type t, myblog.t_user u
+        where
+              b.type_id = t.id
+        and b.user_id = u.id
+        and recommend = true
+        and published = true
+        order by b.update_time desc
+        limit #{num}
+    </select>
+
+    <!-- 2、查询：（最新、不推荐）的num篇文章 -->
+    <select id="selectBlogListByLatestNotRecommendNum" parameterType="int" resultMap="ResultOne">
+        select
+               b.id 'bId',
+               title,
+               description,
+               first_picture 'firstPicture',
+               u.id 'uId',
+               u.nickname 'uNickname',
+               u.avatar  'uAvatar' ,
+               b.create_time 'createTime',
+               b.update_time 'updateTime',
+               views,
+               t.id 'tId',
+               t.name 'tName',
+               recommend
+        from myblog.t_blog b, myblog.t_type t, myblog.t_user u
+        where
+            b.type_id = t.id
+        and b.user_id = u.id
+        and recommend = false
+        and published = true
+        order by b.update_time desc
+        limit #{num}
+    </select>
+
+    <!-- 3、查询：（博客ID） 查询博客信息 -->
+    <select id="selectBlogByBlogId" parameterType="long" resultMap="ResultOne">
+        select
+               b.id 'bId',
+               title,
+               description,
+               first_picture 'firstPicture',
+               u.id  'uId',
+               u.nickname 'uNickname',
+               u.avatar 'uAvatar' ,
+               b.create_time 'createTime',
+               b.update_time 'updateTime',
+               views,
+               t.id 'tId',
+               t.name 'tName',
+               recommend,
+               commentable,
+               share_statement 'shareStatement',
+               published,
+               flag,
+               appreciation,
+               content
+        from myblog.t_blog b, myblog.t_type t, myblog.t_user u
+        where
+              b.id = #{id}
+        and b.type_id = t.id
+        and b.user_id = u.id
+    </select>
+
+    <!-- 4、查询所有的博客 -->
+    <select id="selectAllBlogList" resultMap="ResultTwo">
+       select * from myblog.t_blog
+    </select>
+
+    <!-- 5、查询：通过（分类id）查询博客列表 -->
+    <select id="selectBlogListByTypeId" parameterType="long" resultMap="ResultOne">
+        select b.id 'bId',
+               title,
+               description,
+               first_picture 'firstPicture',
+               u.id 'uId',
+               u.nickname 'uNickname',
+               u.avatar 'uAvatar',
+               b.create_time 'createTime',
+               b.update_time 'updateTime',
+               views,
+               t.id 'tId',
+               t.name 'tName',
+               recommend,
+               commentable,
+               share_statement 'shareStatement',
+               published,
+               flag,
+               appreciation,
+               content
+        from myblog.t_blog b, myblog.t_type t, myblog.t_user u
+        where
+            b.type_id = #{id}
+        and b.type_id = t.id
+        and b.user_id = u.id
+        and published = true
+    </select>
+
+    <!--6、查询：博客所有的年份-->
+    <select id="selectAllBlogYearList" resultType="int">
+        select year(create_time) 'years'
+        from myblog.t_blog
+        group by years
+        order by years desc
+    </select>
+
+    <!--7、查询：通过（博客年份）查询所有博客-->
+    <select id="selectAllBlogListByYear" parameterType="int" resultType="blog">
+        select id,
+               title,
+               create_time 'createTime',
+               flag
+        from myblog.t_blog
+        where year(create_time) = #{year}
+        and published = true
+    </select>
+
+    <!--8、查询：通过（搜索字符串），模糊查询（标题、内容、描述）包含的所有博客-->
+    <select id="selectAllBlogListByQueryStr" parameterType="String" resultMap="ResultOne">
+        <bind name="myQuery" value="'%'+query+'%'"/>
+        select b.id 'bId',
+               title,
+               description,
+               first_picture 'firstPicture',
+               u.id  'uId',
+               u.nickname 'uNickname',
+               u.avatar 'uAvatar',
+               b.create_time 'createTime',
+               views,
+               t.id 'tId',
+               t.name 'tName'
+        from myblog.t_blog b, myblog.t_type t, myblog.t_user u
+        where
+            b.type_id = t.id
+        and b.user_id = u.id
+        and published = true
+        and
+            (
+                title like #{myQuery}
+                or description like #{myQuery}
+                or content like #{myQuery}
+            )
+    </select>
+
+    <!--9、更新：通过（博客id）， 更新博客（访问次数+1）-->
+    <update id="updateBlogViewsByBlogId" parameterType="Long">
+        update myblog.t_blog
+        set views = views + 1
+        where id = #{id}
+    </update>
+
+    <!--10、查询：通过Search对象（title、typeName, recommend）, 查询博客信息-->
+    <select id="selectBlogListBySearchBlogInfo" parameterType="com.lw.vo.SearchBlogInfo" resultType="blog">
+        <if test="title != null">
+            <bind name="myTitle" value="'%'+title+'%'"/>
+        </if>
+        select t_blog.id 'id',
+               title,
+               recommend,
+               appreciation,
+               commentable,
+               published,
+               share_statement 'shareStatement',
+               update_time 'updateTime',
+               update_time 'createTime',
+               tt.id 'type.id',
+               tt.name 'type.name'
+        from myblog.t_blog
+        inner join myblog.t_type tt
+        on t_blog.type_id = tt.id
+        <where>
+            <if test="title != null and title != ''">
+                 and BINARY title like #{myTitle}
+            </if>
+
+            <if test="typeName != null and typeName != ''">
+                and tt.name = #{typeName}
+            </if>
+
+            <if test="recommend != null and recommend != ''">
+                and recommend = #{recommend}
+            </if>
+        </where>
+    </select>
+
+    <!--11、添加: 通过Blog对象, 并返回博客（自增ID）注：此处须和数据库字段顺序一一对应 -->
+    <insert id="insertBlogByBlog" parameterType="blog">
+        <selectKey resultType="Long" keyProperty="id" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into myblog.t_blog
+        values (id,
+                #{title},
+                #{content},
+                #{firstPicture},
+                #{flag},
+                #{views},
+                #{appreciation},
+                #{shareStatement},
+                #{commentable},
+                #{published},
+                #{recommend},
+                #{createTime},
+                #{updateTime},
+                #{type.id},
+                #{user.id},
+                #{description})
+    </insert>
+
+    <!--12、更新：通过Blog对象-->
+    <update id="updateBlogByBlog" parameterType="blog">
+        update  myblog.t_blog
+        set title = #{title},
+            content = #{content},
+            first_picture = #{firstPicture},
+            flag = #{flag},
+            appreciation = #{appreciation},
+            share_statement = #{shareStatement},
+            commentable = #{commentable},
+            published = #{published},
+            recommend = #{recommend},
+            update_time = #{updateTime},
+            type_id = #{type.id},
+            description = #{description}
+        where id = #{id}
+    </update>
+
+    <!--13、删除博客：通过blogId-->
+    <delete id="deleteBlogByBlogId" parameterType="Long">
+        delete from myblog.t_blog
+        where id = #{id}
+    </delete>
+
+    <!--14、更新：通过Blog对象-->
+    <update id="updateBlogBySwitchVO" parameterType="com.lw.vo.SwitchVO">
+        update  myblog.t_blog
+        <set>
+            <if test="switchName == 'recommend'">
+                recommend = #{switchState},
+            </if>
+
+            <if test="switchName == 'appreciation'">
+                appreciation = #{switchState},
+            </if>
+
+            <if test="switchName == 'commentable'">
+                commentable = #{switchState},
+            </if>
+
+            <if test="switchName == 'shareStatement'">
+                share_statement = #{switchState}
+            </if>
+        </set>
+        where id = #{blogId};
+    </update>
+
+
+    <!--15、查询：博客总数目-->
+    <select id="selectAllBlogNum" resultType="Long">
+        select count(*)
+        from myblog.t_blog
+    </select>
+</mapper>

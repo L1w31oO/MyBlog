@@ -1,0 +1,21 @@
+spring:
+  thymeleaf:
+    mode: HTML
+  profiles:
+    active: pro
+  output:
+    ansi:
+      enabled: detect #多彩输出日志，如果你的编辑器支持的话
+
+# 设置（分类页面）：按多少篇文章分页
+typeSize: 5
+
+# 设置（搜索页面）：按多少篇文章分页
+searchSize: 5
+
+# 设置：（前端首页）推荐的博客数目
+recommendBlogNumSize: 5
+
+
+# 二次加密的：salt (自定义)
+salt: 2020

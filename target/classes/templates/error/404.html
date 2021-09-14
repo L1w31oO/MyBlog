@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/frontend_fragment::head(404页面)">
+  <meta charset="UTF-8">
+  <title>404</title>
+</head>
+
+<body>
+<!--导航栏-->
+<div>
+  <nav th:replace="~{fragment/frontend_fragment::nav(0)}"></nav>
+</div>
+
+<div class="m-container-small m-padded-tb-massive">
+  <div class="ui error message m-padded-tb-massive">
+    <div class="ui center aligned container">
+      <h2>404</h2>
+      <h4>对不起，你访问的资源不存在</h4>
+    </div>
+  </div>
+</div>
+
+<!--底部footer-->
+<footer th:replace="fragment/frontend_fragment::footer"></footer>
+
+</body>
+
+</html>
